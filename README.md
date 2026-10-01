@@ -4,7 +4,7 @@
 
 YouTube AI Summarizer is a web application that extracts transcripts from YouTube videos and uses Generative AI to generate concise, easy-to-read summaries.
 
-The application supports **English and Hindi summaries**, user authentication, summary history, PDF export, and a REST API.
+The application supports **English and Hindi summaries**, user authentication, summary history, sentiment analysis, PDF export, YouTube video information, and a Django REST API.
 
 ---
 
@@ -15,8 +15,8 @@ The application supports **English and Hindi summaries**, user authentication, s
   - Supports videos with available captions/transcripts.
 
 - 🤖 **AI-Powered Summarization**
-  - Uses Generative AI to convert long transcripts into concise summaries.
-  - Supports multiple AI providers such as **Google Gemini** and **Groq**.
+  - Generate concise summaries from long YouTube transcripts.
+  - Supports **Google Gemini** and **Groq**.
 
 - 🌐 **Multi-Language Summaries**
   - Generate summaries in:
@@ -24,60 +24,68 @@ The application supports **English and Hindi summaries**, user authentication, s
     - 🇮🇳 Hindi
 
 - 📺 **YouTube Video Information**
-  - Fetch basic information about YouTube videos using the YouTube Data API.
+  - Fetch video information using the YouTube Data API.
+
+- 🧠 **Sentiment Analysis**
+  - Analyze the sentiment of the generated content.
+  - Provides sentiment-related output along with the summary.
 
 - 👤 **User Authentication**
   - User registration
-  - Login/logout
+  - Login and logout
   - Authenticated user sessions
 
 - 📊 **User Dashboard**
-  - View saved summaries
+  - View previously generated summaries
+  - Manage saved summaries
   - Access summary history
-  - Manage previously generated summaries
 
 - 📝 **Summary History**
-  - Save generated summaries.
-  - View previously generated summaries.
+  - Save generated summaries
+  - View previously saved summaries
 
 - 🗑️ **Delete Summaries**
-  - Remove unwanted summaries from history.
+  - Delete summaries from history
 
 - 📄 **PDF Export**
-  - Export generated summaries as PDF files.
+  - Export generated summaries as PDF documents
 
-- 🔌 **Django REST API**
-  - RESTful backend architecture for handling application functionality.
+- 🔌 **REST API**
+  - Backend APIs built using Django REST Framework
 
 ---
 
 ## 🧠 How It Works
 
 ```text
-                YouTube URL
-                     │
-                     ▼
-             Extract Video ID
-                     │
-                     ▼
-          Fetch YouTube Transcript
-                     │
-                     ▼
-              Text Processing
-                     │
-                     ▼
-             Generative AI Model
-                     │
-                     ▼
-              Generate Summary
-                     │
-              ┌──────┴──────┐
-              ▼             ▼
-          Display         Save
-          Summary        Summary
-                            │
-                            ▼
-                       PDF Export
+                    YouTube URL
+                         │
+                         ▼
+                Extract Video ID
+                         │
+                         ▼
+              Fetch YouTube Transcript
+                         │
+                         ▼
+                  Text Processing
+                         │
+                         ▼
+                Generative AI Model
+                         │
+                         ▼
+                  Generate Summary
+                         │
+                  ┌──────┴──────┐
+                  ▼             ▼
+               Display         Save
+               Summary        Summary
+                  │             │
+                  │             ▼
+                  │        Summary History
+                  │             │
+                  └──────┬──────┘
+                         ▼
+                    PDF Export
 ```
 
 ---
@@ -86,15 +94,15 @@ The application supports **English and Hindi summaries**, user authentication, s
 
 | Category | Technologies |
 |---|---|
-| Backend | Python, Django |
-| API | Django REST Framework |
-| AI / LLM | Google Gemini, Groq |
-| NLP | NLTK |
-| YouTube | YouTube Transcript API, YouTube Data API |
-| Frontend | HTML, CSS, JavaScript |
-| Database | SQLite |
-| PDF Generation | ReportLab |
-| Environment Management | Python `venv`, `.env` |
+| **Backend** | Python, Django |
+| **API** | Django REST Framework |
+| **AI / LLM** | Google Gemini, Groq |
+| **NLP** | NLTK |
+| **YouTube** | YouTube Transcript API, YouTube Data API |
+| **Frontend** | HTML, CSS, JavaScript |
+| **Database** | SQLite |
+| **PDF Generation** | ReportLab |
+| **Environment** | Python `venv`, `python-dotenv` |
 
 ---
 
@@ -128,6 +136,12 @@ youtube-summarizer/
 │       ├── asgi.py
 │       └── wsgi.py
 │
+├── screenshots/
+│   ├── Home.png
+│   ├── output-text.png
+│   ├── sentiment-output.png
+│   └── dashboard.png
+│
 ├── .env.example
 ├── .gitignore
 ├── requirements.txt
@@ -144,13 +158,9 @@ youtube-summarizer/
 git clone https://github.com/nirbhayyy/youtube-summarizer.git
 ```
 
-Navigate into the project:
-
 ```bash
 cd youtube-summarizer
 ```
-
-> Replace the repository URL with your actual GitHub repository URL if the repository name is different.
 
 ---
 
@@ -160,13 +170,13 @@ cd youtube-summarizer
 python -m venv venv
 ```
 
-### Windows
+#### Windows
 
 ```bash
 venv\Scripts\activate
 ```
 
-### macOS / Linux
+#### macOS / Linux
 
 ```bash
 source venv/bin/activate
@@ -194,13 +204,13 @@ Example:
 API_KEY2=your-gemini-api-key
 ```
 
-If your application uses additional services, add their API keys to the `.env` file as required.
+Add any other API keys required by your local configuration.
 
-### ⚠️ Important
+### ⚠️ Security
 
-**Never commit your `.env` file or API keys to GitHub.**
+Never commit your `.env` file or API keys to GitHub.
 
-Make sure `.env` is included in `.gitignore`:
+Your `.gitignore` should contain:
 
 ```gitignore
 .env
@@ -232,43 +242,9 @@ Start the development server:
 python manage.py runserver
 ```
 
-Open the application in your browser:
+Open the application:
 
-```text
-http://127.0.0.1:8000/
-```
-
----
-
-## 🔌 API
-
-The backend is built using **Django REST Framework**, allowing the summarization functionality to be accessed through API endpoints.
-
-The API handles operations such as:
-
-```text
-YouTube URL
-     ↓
-API Request
-     ↓
-Transcript Extraction
-     ↓
-AI Processing
-     ↓
-Generated Summary
-     ↓
-API Response
-```
-
-API endpoints may include functionality for:
-
-- Video summarization
-- Transcript processing
-- Video information
-- User authentication
-- Summary history
-- Summary deletion
-- PDF generation
+**http://127.0.0.1:8000/**
 
 ---
 
@@ -276,58 +252,92 @@ API endpoints may include functionality for:
 
 ### 🏠 Home Page
 
-_Add application screenshot here._
-
-```text
-screenshots/home.png
-```
-
-### 📊 Dashboard
-
-_Add dashboard screenshot here._
-
-
-screenshots/dashboard.png
-
-
-### 📝 Generated Summary
-
-_Add summary page screenshot here._
-
-```text
-screenshots/summary.png
-```
-
-
-
-> Recommended: create a `screenshots/` folder in the repository and place your application screenshots inside it.
+![YouTube AI Summarizer Home Page](screenshots/Home.png)
 
 ---
 
-## 🎯 Example Workflow
+### 📝 Generated Summary
 
-A typical user workflow looks like this:
+![Generated Summary](screenshots/output-text.png)
+
+---
+
+### 🧠 Sentiment Analysis
+
+![Sentiment Analysis](screenshots/sentiment-output.png)
+
+---
+
+### 📊 User Dashboard
+
+![User Dashboard](screenshots/dashboard.png)
+
+---
+
+## 🔌 REST API
+
+The backend is built using **Django REST Framework**.
+
+The application follows a request flow similar to:
+
+```text
+YouTube URL
+     │
+     ▼
+API Request
+     │
+     ▼
+Transcript Extraction
+     │
+     ▼
+Text Processing
+     │
+     ▼
+Generative AI
+     │
+     ▼
+Generated Summary
+     │
+     ▼
+API Response
+```
+
+The API layer is responsible for handling functionality such as:
+
+- 🎥 Video summarization
+- 📝 Transcript processing
+- 📺 YouTube video information
+- 👤 User authentication
+- 📚 Summary history
+- 🗑️ Summary deletion
+- 📄 PDF generation
+
+---
+
+## 🎯 User Workflow
 
 ```text
 1. User opens the application
-              ↓
+             ↓
 2. User enters a YouTube URL
-              ↓
+             ↓
 3. Application extracts the video ID
-              ↓
-4. Transcript is retrieved
-              ↓
+             ↓
+4. YouTube transcript is retrieved
+             ↓
 5. Transcript is processed
-              ↓
-6. Generative AI creates the summary
-              ↓
-7. User selects English / Hindi
-              ↓
+             ↓
+6. Generative AI generates the summary
+             ↓
+7. User selects English or Hindi
+             ↓
 8. Summary is displayed
-              ↓
+             ↓
 9. User can save the summary
-              ↓
-10. Summary can be exported as PDF
+             ↓
+10. User can view it from the dashboard
+             ↓
+11. User can export the summary as PDF
 ```
 
 ---
@@ -336,86 +346,92 @@ A typical user workflow looks like this:
 
 ### `youtube_service.py`
 
-Handles YouTube-related operations such as:
+Responsible for YouTube-related functionality:
 
 - Extracting video information
 - Working with YouTube APIs
-- Retrieving transcript data
+- Retrieving video transcripts
 
 ### `prompts.py`
 
-Contains prompts used to guide the Generative AI model during summarization.
+Contains prompts used to guide the Generative AI models during summarization.
+
+### `sentiment.py`
+
+Handles sentiment-related processing and analysis.
 
 ### `utils.py`
 
-Contains reusable helper functions used throughout the application.
+Contains reusable utility and helper functions used throughout the application.
 
 ### `models.py`
 
-Defines database models used for storing application data and summary history.
+Defines Django database models used to store application data and summary history.
 
 ### `serializers.py`
 
-Handles serialization and validation of API data using Django REST Framework.
+Handles API serialization and validation using Django REST Framework.
 
 ### `views.py`
 
-Contains application and API views responsible for processing user requests.
+Contains Django views and API logic responsible for handling application requests.
 
 ---
 
 ## 🔐 Security
 
-The project follows basic security practices:
+The application follows basic security practices:
 
-- API keys are stored in environment variables.
-- `.env` is excluded from Git.
-- Django authentication is used for user accounts.
-- Sensitive credentials are not stored directly in source code.
+- 🔑 API keys are stored using environment variables.
+- 🚫 `.env` is excluded from Git.
+- 👤 Django authentication is used for user accounts.
+- 🔒 Sensitive credentials are not hard-coded into the source code.
 
 For production deployment, additional security configuration should be applied.
 
 ---
 
-## 🚀 Future Improvements
-
-Planned improvements include:
-
-- 🌍 Support for additional languages
-- 🎬 Better handling of long YouTube videos
-- 📄 Downloadable TXT/Markdown summaries
-- 🤖 Support for additional LLM providers
-- 🧪 Automated unit and API testing
-- 🗄️ Production database support such as PostgreSQL
-- ⚡ Background processing for long-running summaries
-- 📈 Improved dashboard analytics
-- 🔐 Enhanced authentication and security
-- ☁️ Production deployment and cloud storage
-
----
-
 ## 🐛 Known Limitations
 
-- Videos must have an accessible transcript/caption track.
+- YouTube videos must have an accessible transcript or caption track.
 - Very long transcripts may require additional processing or chunking.
-- AI-generated summaries may occasionally contain inaccuracies.
-- API availability and usage limits depend on the configured AI/YouTube services.
+- AI-generated summaries may occasionally contain inaccurate information.
+- AI and YouTube APIs are subject to their respective usage limits and availability.
+- SQLite is currently used as the development database.
 
 ---
 
-## 📚 Learning Outcomes
+## 🚀 Future Improvements
 
-This project helped me gain practical experience with:
+- 🌍 Add support for more languages
+- 🎬 Improve long-video summarization
+- 📄 Add TXT and Markdown export
+- 🤖 Add more AI model providers
+- ⚡ Add background processing for long-running tasks
+- 🧪 Improve automated unit and API testing
+- 🗄️ Add PostgreSQL for production
+- 📈 Improve dashboard analytics
+- 🔐 Improve authentication and security
+- ☁️ Deploy the application to a production cloud environment
+
+---
+
+## 📚 What I Learned
+
+Through this project, I gained practical experience with:
 
 - Python backend development
-- Django and Django REST Framework
+- Django
+- Django REST Framework
 - REST API development
 - Generative AI integration
 - Prompt engineering
 - NLP and text processing
 - YouTube API integration
-- Authentication and database management
-- PDF generation
+- YouTube transcript extraction
+- User authentication
+- Database management
+- PDF generation with ReportLab
 - Environment variable management
 - Building an end-to-end AI-powered web application
 
@@ -427,16 +443,16 @@ This project helped me gain practical experience with:
 
 **MCA | AI/ML Enthusiast | Python | Django | Machine Learning**
 
-Interested in building practical applications using **Artificial Intelligence, Machine Learning, NLP, and Python**.
+I enjoy building practical applications using **Artificial Intelligence, Machine Learning, NLP, and Python**.
 
 ---
 
 ## ⭐ Support
 
-If you find this project useful, consider giving the repository a ⭐ on GitHub.
+If you found this project useful or interesting, consider giving the repository a ⭐ on GitHub.
 
 ---
 
 ## 📄 License
 
-This project is intended for educational and portfolio purposes.
+This project is developed for educational and portfolio purposes.
