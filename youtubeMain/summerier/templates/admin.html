@@ -1,0 +1,323 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Panel | YouTube Summarizer</title>
+    <link rel="stylesheet" href="{% static 'css/admin.css' %}" />
+</head>
+<body>
+
+<!-- Navigation -->
+<nav class="navbar">
+    <div class="nav-container">
+        <a href="{% url 'home' %}" class="brand">
+            <span class="brand-icon">🎥</span>
+            <span class="brand-name">YouTube Summarizer</span>
+            <span class="admin-tag">Admin</span>
+        </a>
+
+        <div class="nav-user">
+            <div class="user-greeting">
+                <span class="user-avatar">{{ request.user.username|first|upper }}</span>
+                <span class="welcome-text">Welcome, <strong>{{ request.user.username }}</strong></span>
+            </div>
+
+            <div class="nav-links">
+                <a href="{% url 'dashboard' %}" class="nav-link">My Dashboard</a>
+                <form method="POST" action="{% url 'logout' %}" class="inline-form">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-logout">Logout</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<main class="main-container">
+
+    <!-- Messages -->
+    {% if messages %}
+    <div class="messages-stack">
+        {% for message in messages %}
+        <div class="admin-message {% if message.tags %}msg-{{ message.tags }}{% endif %}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Header -->
+    <header class="page-header">
+        <div class="header-text">
+            <h1>Admin Overview</h1>
+            <p>Monitor users, activity, and generated summaries across the platform.</p>
+        </div>
+    </header>
+
+    <!-- Stats -->
+    <section class="stats-grid">
+        <div class="stat-card">
+            <span class="stat-icon">👥</span>
+            <div class="stat-body">
+                <span class="stat-value">{{ total_users|default:"0" }}</span>
+                <span class="stat-label">Total Users</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <span class="stat-icon">📚</span>
+            <div class="stat-body">
+                <span class="stat-value">{{ total_summary|default:"0" }}</span>
+                <span class="stat-label">Total Summaries</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <span class="stat-icon">⚡</span>
+            <div class="stat-body">
+                <span class="stat-value">{{ todays_summary|default:"0" }}</span>
+                <span class="stat-label">Summaries Today</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Users Table -->
+    <section class="panel-section">
+        <div class="section-header">
+            <h2>Users</h2>
+            <form method="GET" class="search-form">
+                <input
+                    type="text"
+                    name="q_user"
+                    class="search-input"
+                    placeholder="🔍 Search users..."
+                    value="{{ user_query }}"
+                >
+                {% if summary_query %}<input type="hidden" name="q_summary" value="{{ summary_query }}">{% endif %}
+            </form>
+        </div>
+
+        <div class="table-wrap">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Date Joined</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for u in user %}
+                    <tr>
+                        <td class="muted">{{ forloop.counter0|add:user.start_index }}</td>
+                        <td>
+                            <div class="user-cell">
+                                <span class="mini-avatar">{{ u.username|first|upper }}</span>
+                                {{ u.username }}
+                            </div>
+                        </td>
+                        <td class="muted">{{ u.email|default:"—" }}</td>
+                        <td class="muted">{{ u.date_joined|date:"d M Y, H:i" }}</td>
+                        <td>
+                            {% if u.is_active %}
+                            <span class="status-pill status-active">Active</span>
+                            {% else %}
+                            <span class="status-pill status-inactive">Inactive</span>
+                            {% endif %}
+                            {% if u.is_staff %}
+                            <span class="status-pill status-admin">Admin</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if u != request.user %}
+                            <div class="row-actions">
+                                <form method="POST" class="inline-form">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="toggle_active">
+                                    <input type="hidden" name="user_id" value="{{ u.id }}">
+                                    <button type="submit" class="btn-mini" title="{% if u.is_active %}Deactivate{% else %}Activate{% endif %}">
+                                        {% if u.is_active %}🚫{% else %}✅{% endif %}
+                                    </button>
+                                </form>
+
+                                {% if not u.is_superuser %}
+                                <form method="POST" class="inline-form">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="toggle_staff">
+                                    <input type="hidden" name="user_id" value="{{ u.id }}">
+                                    <button type="submit" class="btn-mini" title="{% if u.is_staff %}Revoke admin{% else %}Make admin{% endif %}">
+                                        {% if u.is_staff %}👤{% else %}🛡️{% endif %}
+                                    </button>
+                                </form>
+
+                                <form method="POST" class="inline-form" onsubmit="return confirm('Delete user {{ u.username }}? This cannot be undone.');">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="delete_user">
+                                    <input type="hidden" name="user_id" value="{{ u.id }}">
+                                    <button type="submit" class="btn-mini btn-mini-danger" title="Delete user">🗑️</button>
+                                </form>
+                                {% endif %}
+                            </div>
+                            {% else %}
+                            <span class="muted">You</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="empty-row">No users found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- User pagination -->
+        {% if user.has_other_pages %}
+        <div class="pagination">
+            {% if user.has_previous %}
+                <a href="?user_page={{ user.previous_page_number }}{% if user_query %}&q_user={{ user_query }}{% endif %}{% if summary_query %}&q_summary={{ summary_query }}{% endif %}" class="page-link">← Prev</a>
+            {% endif %}
+            <span class="page-info">Page {{ user.number }} of {{ user.paginator.num_pages }}</span>
+            {% if user.has_next %}
+                <a href="?user_page={{ user.next_page_number }}{% if user_query %}&q_user={{ user_query }}{% endif %}{% if summary_query %}&q_summary={{ summary_query }}{% endif %}" class="page-link">Next →</a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </section>
+
+    <!-- Recent Summaries Table -->
+    <section class="panel-section">
+        <div class="section-header">
+            <h2>Recent Summaries</h2>
+            <form method="GET" class="search-form">
+                <input
+                    type="text"
+                    name="q_summary"
+                    class="search-input"
+                    placeholder="🔍 Search summaries..."
+                    value="{{ summary_query }}"
+                >
+                {% if user_query %}<input type="hidden" name="q_user" value="{{ user_query }}">{% endif %}
+            </form>
+        </div>
+
+        <div class="table-wrap">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Video</th>
+                        <th>User</th>
+                        <th>Channel</th>
+                        <th>Sentiment</th>
+                        <th>Created</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for s in summaries %}
+                    <tr>
+                        <td>
+                            <div class="video-cell">
+                                {% if s.thumbnail_url %}
+                                <img src="{{ s.thumbnail_url }}" alt="" class="video-thumb" loading="lazy">
+                                {% endif %}
+                                <span class="video-title-text" title="{{ s.video_title }}">{{ s.video_title|truncatechars:45 }}</span>
+                            </div>
+                        </td>
+                        <td class="muted">{{ s.user.username }}</td>
+                        <td class="muted">{{ s.channel_name }}</td>
+                        <td>
+                            {% if s.sentiment %}
+                            <span class="status-pill status-{{ s.sentiment|lower }}">{{ s.sentiment }}</span>
+                            {% else %}
+                            <span class="muted">—</span>
+                            {% endif %}
+                        </td>
+                        <td class="muted">{{ s.created_at|date:"d M Y, H:i" }}</td>
+                        <td>
+                            <div class="row-actions">
+                                <a href="{{ s.youtube_url }}" target="_blank" rel="noopener noreferrer" class="btn-mini" title="Watch on YouTube">
+                                    ▶
+                                </a>
+                                <button
+                                    type="button"
+                                    class="btn-mini"
+                                    title="Edit summary"
+                                    onclick="openEditModal({{ s.id }}, {{ s.video_title|escapejs }}, {{ s.channel_name|default:''|escapejs }}, {{ s.Summary|escapejs }}, '{{ s.sentiment|default:'Neutral' }}')"
+                                >
+                                    ✏️
+                                </button>
+                                <form method="POST" class="inline-form" onsubmit="return confirm('Delete this summary? This cannot be undone.');">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="delete_summary">
+                                    <input type="hidden" name="summary_id" value="{{ s.id }}">
+                                    <button type="submit" class="btn-mini btn-mini-danger" title="Delete summary">🗑️</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="empty-row">No summaries yet.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+</main>
+
+<!-- Edit Summary Modal -->
+<div id="edit-modal" class="modal-overlay" style="display:none;">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h3>Edit Summary</h3>
+            <button type="button" class="modal-close" onclick="closeEditModal()">✕</button>
+        </div>
+
+        <form method="POST" id="edit-summary-form">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="update_summary">
+            <input type="hidden" name="summary_id" id="edit-summary-id">
+
+            <div class="modal-field">
+                <label for="edit-video-title">Video Title</label>
+                <input type="text" id="edit-video-title" name="video_title" required>
+            </div>
+
+            <div class="modal-field">
+                <label for="edit-channel-name">Channel Name</label>
+                <input type="text" id="edit-channel-name" name="channel_name">
+            </div>
+
+            <div class="modal-field">
+                <label for="edit-sentiment">Sentiment</label>
+                <select id="edit-sentiment" name="sentiment">
+                    <option value="Positive">Positive</option>
+                    <option value="Neutral">Neutral</option>
+                    <option value="Negative">Negative</option>
+                </select>
+            </div>
+
+            <div class="modal-field">
+                <label for="edit-summary-text">Summary Text</label>
+                <textarea id="edit-summary-text" name="Summary" rows="8" required></textarea>
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" class="btn-outline" onclick="closeEditModal()">Cancel</button>
+                <button type="submit" class="btn-primary">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="{% static 'js/admin.js' %}"></script>
+
+</body>
+</html>

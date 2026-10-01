@@ -1,0 +1,244 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard | YouTube Summarizer</title>
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}" />
+  </head>
+  <body>
+    <!-- Hidden CSRF token for JavaScript fetch requests -->
+    {% csrf_token %}
+
+    <!-- Navigation Header -->
+    <nav class="navbar">
+      <div class="nav-container">
+        <a href="{% url 'home' %}" class="brand">
+          <span class="brand-icon">🎥</span>
+          <span class="brand-name">YouTube Summarizer</span>
+        </a>
+
+        <div class="nav-user">
+          <span class="user-greeting"
+            >Welcome, <strong>{{ user.username }}</strong></span
+          >
+
+          <div class="nav-links">
+            <a href="{% url 'summizeui' %}" class="nav-link">Summarizer</a>
+             <a href="{% url 'admin' %}" class="nav-link">admin</a
+            <form method="POST" action="{% url 'logout' %}" class="inline-form">
+              {% csrf_token %}
+              <button type="submit" class="btn-logout">Logout</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Main Content Container -->
+    <main class="main-container">
+      <!-- Header & Primary Action -->
+      <header class="dashboard-header">
+        <div class="header-text">
+          <h1>Overview</h1>
+          <p>Track and access your generated YouTube video summaries.</p>
+        </div>
+        <a href="{% url 'summizeui' %}" class="btn-primary">
+          <span>➕</span> Generate New Summary
+        </a>
+      </header>
+
+      <!-- Key Metrics / Stats -->
+      <section class="stats-grid">
+        <div class="stat-card">
+          <span class="stat-value">{{ total_summary|default:"0" }}</span>
+          <span class="stat-label">Total Summaries</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value">{{ todays_summary|default:"0" }}</span>
+          <span class="stat-label">Summaries Today</span>
+        </div>
+      </section>
+
+      <!-- Recent Summaries Section -->
+      <section class="summaries-section">
+        <div class="section-header">
+          <h2>Recent Summaries</h2>
+        </div>
+
+        {% if summaries %}
+        <div class="summary-grid">
+          {% for summary in summaries %}
+          <article class="summary-card" id="summary-card-{{ summary.id }}">
+            <!-- Video Thumbnail Link -->
+            {% if summary.thumbnail_url %}
+            <div class="card-media">
+              <a
+                href="{{ summary.youtube_url }}"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <img
+                  src="{{ summary.thumbnail_url }}"
+                  alt="{{ summary.video_title }}"
+                  class="thumbnail-img"
+                />
+              </a>
+              {% if summary.sentiment %}
+              <span class="sentiment-pill sentiment-{{ summary.sentiment|lower }}">
+    {% if summary.sentiment|lower == "positive" %}
+        🙂
+    {% elif summary.sentiment|lower == "negative" %}
+        🙁
+    {% else %}
+        😐
+    {% endif %}
+    {{ summary.sentiment }}
+</span> 
+              {% endif %}
+            </div>
+            {% endif %}
+
+            <div class="card-header">
+              <!-- Video Title Link -->
+              <h3 class="video-title" title="{{ summary.video_title }}">
+                <a
+                  href="{{ summary.youtube_url }}"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {{ summary.video_title }}
+                </a>
+              </h3>
+              <p class="channel-name">
+                <span class="icon">📺</span> {{ summary.channel_name }}
+              </p>
+            </div>
+
+            <div class="card-stats">
+              <div class="stat-item">
+                <span class="stat-num">{{ summary.views }}</span>
+                <span class="stat-desc">Views</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-num">{{ summary.likes }}</span>
+                <span class="stat-desc">Likes</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-num">{{ summary.duration }}</span>
+                <span class="stat-desc">Duration</span>
+              </div>
+            </div>
+
+            <!-- Sentiment Breakdown -->
+            {% if summary.sentiment %}
+            <div class="sentiment-mini">
+              <span class="sentiment-mini-label">Sentiment</span>
+              <span
+                class="sentiment-badge sentiment-{{ summary.sentiment|lower }}"
+                >{{ summary.sentiment }}</span
+              >
+              <div class="sentiment-mini-track">
+                <div
+                  class="mini-fill positive"
+                  style="width: {% widthratio summary.positive_score 1 100 %}%;"
+                  title="Positive: {{ summary.positive_score|floatformat:2 }}"
+                ></div>
+                <div
+                  class="mini-fill neutral"
+                  style="width: {% widthratio summary.neutral_score 1 100 %}%;"
+                  title="Neutral: {{ summary.neutral_score|floatformat:2 }}"
+                ></div>
+                <div
+                  class="mini-fill negative"
+                  style="width: {% widthratio summary.negative_score 1 100 %}%;"
+                  title="Negative: {{ summary.negative_score|floatformat:2 }}"
+                ></div>
+              </div>
+            </div>
+            {% endif %}
+
+            <footer class="card-footer">
+              <span class="created-date"
+                >📅 {{ summary.created_at|date:"d M Y, H:i" }}</span
+              >
+
+              <div class="card-actions">
+                <a
+                  href="{{ summary.youtube_url }}"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="btn-watch"
+                  title="Watch on YouTube"
+                >
+                  ▶ Watch
+                </a>
+                <button
+                  type="button"
+                  class="btn-delete"
+                  onclick="deleteSummary({{ summary.id }})"
+                  title="Delete summary"
+                >
+                  🗑️
+                </button>
+              </div>
+            </footer>
+          </article>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+          <div class="empty-icon">📂</div>
+          <h3>No summaries generated yet</h3>
+          <p>
+            Start by pasting a YouTube link to create your first video summary.
+          </p>
+          <a href="{% url 'summizeui' %}" class="btn-primary btn-inline"
+            >Create Summary</a
+          >
+        </div>
+        {% endif %}
+      </section>
+    </main>
+
+    <!-- Delete Script -->
+    <script>
+      async function deleteSummary(summaryId) {
+        if (!confirm("Are you sure you want to delete this summary?")) {
+          return;
+        }
+
+        const csrfToken = document.querySelector(
+          "[name=csrfmiddlewaretoken]",
+        ).value;
+
+        try {
+          const response = await fetch(`/api/del/${summaryId}/`, {
+            method: "DELETE",
+            headers: {
+              "X-CSRFToken": csrfToken,
+              "Content-Type": "application/json",
+            },
+          });
+
+          if (response.ok) {
+            const card = document.getElementById(`summary-card-${summaryId}`);
+            if (card) {
+              card.style.transition =
+                "opacity 0.25s ease, transform 0.25s ease";
+              card.style.opacity = "0";
+              card.style.transform = "scale(0.9)";
+              setTimeout(() => card.remove(), 250);
+            }
+          } else {
+            const data = await response.json();
+            alert(data.error || "Failed to delete summary.");
+          }
+        } catch (err) {
+          alert("An error occurred while deleting the summary.");
+        }
+      }
+    </script>
+  </body>
+</html>

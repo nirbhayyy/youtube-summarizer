@@ -1,0 +1,139 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Summarizer</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+
+<body>
+
+<nav class="navbar">
+    <div class="logo">
+        <span class="logo-icon">🎥</span> YouTube Summarizer
+    </div>
+
+    {% if user.is_authenticated %}
+    <div class="nav-right">
+        <div class="welcome">
+            <span class="user-avatar">{{ user.username|first|upper }}</span>
+            <span class="welcome-text">Welcome, <strong>{{ user.username }}</strong></span>
+        </div>
+
+        <div class="nav-links">
+            <a href="{% url 'home' %}" class="nav-link">Home</a>
+            <a href="{% url 'dashboard' %}" class="nav-link">Dashboard</a>
+             <a href="{% url 'admin' %}" class="nav-link">admin</a
+            <form method="POST" action="{% url 'logout' %}" class="inline-form">
+                {% csrf_token %}
+                <button type="submit" class="logout-btn">Logout</button>
+                
+            </form>
+        </div>
+    </div>
+    {% endif %}
+</nav>
+
+<div class="container">
+    <span class="eyebrow">✨ Powered by Gemini AI</span>
+    <h1>AI YouTube Video Summarizer</h1>
+    <p>Paste a link, pick a format, and get an instant AI-generated summary with sentiment insights.</p>
+
+    <form id="summary-form">
+        {% csrf_token %}
+
+        <div class="form-group">
+            <input 
+                type="url" 
+                id="yt-link" 
+                placeholder="Paste YouTube URL..." 
+                required>
+        </div>
+
+        <!-- Options Container -->
+        <div class="options-group">
+            <!-- Summary Type Dropdown -->
+            <div class="select-field">
+                <label for="summary-type">Summary Type</label>
+                <select id="summary-type">
+                    <option value="standard" selected>Standard</option>
+                    <option value="detailed">Detailed Notes</option>
+                    <option value="code">Code & Logic</option>
+                    <option value="bullet_points">Bullet Points</option>
+                    <option value="mindmap">Mind Map</option>
+                </select>
+            </div>
+
+            <!-- Language Select Field -->
+            <div class="select-field">
+                <label for="language">Language</label>
+                <select id="language">
+                    <option value="english" selected>English</option>
+                    <option value="spanish">Spanish</option>
+                    <option value="french">French</option>
+                    <option value="german">German</option>
+                    <option value="hindi">Hindi</option>
+                </select>
+            </div>
+        </div>
+
+        <button type="submit" id="submit-btn">
+            ✨ Generate Summary
+        </button>
+    </form>
+
+    <div id="loading" style="display: none;">
+        <span class="loading-dot"></span>
+        <span class="loading-dot"></span>
+        <span class="loading-dot"></span>
+        Generating Summary...
+    </div>
+
+    <div id="result">
+        <img id="thumbnail" style="display: none;">
+
+        <!-- Toolbar: view toggle + overall sentiment pill -->
+        <div id="result-toolbar" style="display: none;">
+            <div class="view-toggle">
+                <button type="button" id="view-summary-btn" class="toggle-btn active">
+                    📝 Summary
+                </button>
+                <button type="button" id="view-sentiment-btn" class="toggle-btn">
+                    💬 Sentence Sentiment
+                </button>
+            </div>
+            <span id="sentiment-badge" class="sentiment-badge"></span>
+        </div>
+
+        <!-- Summary view -->
+        <div id="summary"></div>
+
+        <!-- Sentence-by-sentence sentiment view (hidden by default) -->
+        <div id="sentence-list" class="sentence-list" style="display: none;"></div>
+
+        <!-- Result footer: dashboard link + export -->
+        <div class="result-footer">
+            <a href="{% url 'dashboard' %}" class="footer-link">
+                📊 View Dashboard
+            </a>
+            <button type="button" id="expaspdf" onclick="downloadPDF()">
+                📄 Export as PDF
+            </button>
+        </div>
+    </div>
+
+    <!-- Compact notice strip -->
+    <p class="notice">
+        ℹ️ Sentence sentiment and PDF export are currently supported for English transcripts only.
+    </p>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="{% static 'js/app.js' %}"></script>
+
+</body>
+</html>

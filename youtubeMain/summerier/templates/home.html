@@ -1,0 +1,182 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>YouTube Summarizer | AI-Powered Video Summaries</title>
+    <link rel="stylesheet" href="{% static 'css/home.css' %}" />
+  </head>
+  <body>
+    <!-- Navigation -->
+    <nav class="navbar">
+      <div class="nav-container">
+        <div class="logo">🎥 YouTube Summarizer</div>
+
+        <div class="nav-actions">
+          {% if user.is_authenticated %}
+          <a href="{% url 'dashboard' %}" class="btn btn-ghost">Dashboard</a>
+          <a href="{% url 'summizeui' %}" class="btn btn-primary"
+            >Go to Summarizer</a
+          >
+          <form method="POST" action="{% url 'logout' %}" class="logout-form">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-ghost">Logout</button>
+          </form>
+          {% else %}
+          <a href="{% url 'login' %}" class="btn btn-ghost">Login</a>
+          <a href="{% url 'register' %}" class="btn btn-primary">Sign Up</a>
+          {% endif %}
+        </div>
+      </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="hero">
+      <div class="hero-content">
+        <span class="eyebrow">✨ Powered by Gemini AI</span>
+        <h1>Turn any YouTube video into a clear, readable summary</h1>
+        <p class="hero-subtitle">
+          Paste a link, pick a format, and get an instant AI-generated summary
+          complete with sentiment analysis — no more scrubbing through hour-long
+          videos.
+        </p>
+
+        <div class="hero-actions">
+          {% if user.is_authenticated %}
+          <a href="{% url 'summizeui' %}" class="btn btn-primary btn-lg">
+            ▶ Start Summarizing
+          </a>
+          {% else %}
+          <a href="{% url 'register' %}" class="btn btn-primary btn-lg">
+            ▶ Get Started Free
+          </a>
+          <a href="{% url 'login' %}" class="btn btn-outline btn-lg"> Login </a>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="hero-glow"></div>
+    </header>
+
+    <!-- What It Does Section -->
+    <section class="section">
+      <div class="section-inner">
+        <h2 class="section-title">What this project does</h2>
+        <p class="section-desc">
+          YouTube Summarizer takes any public YouTube video and generates a
+          concise, structured AI summary of its content — in the format and
+          language you choose. It also analyzes the sentiment of the video's
+          transcript so you know the overall tone before you even watch it.
+        </p>
+
+        <div class="feature-grid">
+          <div class="feature-card">
+            <span class="feature-icon">🧠</span>
+            <h3>AI-Generated Summaries</h3>
+            <p>
+              Powered by Gemini, summaries are generated directly from the
+              video's transcript — standard notes, detailed breakdowns, code
+              walkthroughs, bullet points, or mind maps.
+            </p>
+          </div>
+
+          <div class="feature-card">
+            <span class="feature-icon">🌐</span>
+            <h3>Multi-Language Output</h3>
+            <p>
+              Get your summary translated into English, Spanish, French, German,
+              or Hindi — pick your preferred language before generating.
+            </p>
+          </div>
+
+          <div class="feature-card">
+            <span class="feature-icon">💬</span>
+            <h3>Sentiment Analysis</h3>
+            <p>
+              See the overall tone of the video and a sentence-by-sentence
+              sentiment breakdown, color-coded as positive, neutral, or
+              negative.
+            </p>
+          </div>
+
+          <div class="feature-card">
+            <span class="feature-icon">📊</span>
+            <h3>Personal Dashboard</h3>
+            <p>
+              Every summary you generate is saved to your dashboard with video
+              stats — views, likes, duration, and channel — so you can revisit
+              it anytime.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section class="section section-alt">
+      <div class="section-inner">
+        <h2 class="section-title">How it works</h2>
+        <p class="section-desc">Three simple steps from link to insight.</p>
+
+        <div class="steps">
+          <div class="step">
+            <div class="step-number">1</div>
+            <h3>Paste a YouTube link</h3>
+            <p>
+              Drop in the URL of any public video with available captions or a
+              transcript.
+            </p>
+          </div>
+
+          <div class="step-connector"></div>
+
+          <div class="step">
+            <div class="step-number">2</div>
+            <h3>Choose your format</h3>
+            <p>
+              Pick a summary style — standard, detailed, code-focused, bullet
+              points, or mind map — and your preferred output language.
+            </p>
+          </div>
+
+          <div class="step-connector"></div>
+
+          <div class="step">
+            <div class="step-number">3</div>
+            <h3>Read your summary</h3>
+            <p>
+              Get an instant, structured summary along with sentiment insights,
+              then revisit it anytime from your dashboard.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta">
+      <div class="cta-inner">
+        <h2>Ready to save time on long videos?</h2>
+        <p>Create a free account and generate your first summary in seconds.</p>
+        {% if user.is_authenticated %}
+        <a href="{% url 'summizeui' %}" class="btn btn-primary btn-lg"
+          >▶ Start Summarizing</a
+        >
+        {% else %}
+        <a href="{% url 'register' %}" class="btn btn-primary btn-lg"
+          >Sign Up Free</a
+        >
+        {% endif %}
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="footer-inner">
+        <span>🎥 YouTube Summarizer</span>
+        <span class="footer-muted">Built with Django &amp; Gemini AI</span>
+      </div>
+    </footer>
+  </body>
+</html>
