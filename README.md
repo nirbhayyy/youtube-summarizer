@@ -286,9 +286,9 @@ screenshots/home.png
 
 _Add dashboard screenshot here._
 
-```text
+
 screenshots/dashboard.png
-```
+
 
 ### 📝 Generated Summary
 
@@ -298,13 +298,7 @@ _Add summary page screenshot here._
 screenshots/summary.png
 ```
 
-### 📄 PDF Export
 
-_Add PDF export screenshot here._
-
-```text
-screenshots/pdf.png
-```
 
 > Recommended: create a `screenshots/` folder in the repository and place your application screenshots inside it.
 
