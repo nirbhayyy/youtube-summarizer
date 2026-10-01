@@ -110,7 +110,7 @@ def extract_transcrip_details(video_id, targeted_language):
     except Exception as e:
         print(f"Error fetching transcription: {e}")
         return None
-client=genai.Client(api_key=os.getenv('API_KEY2'))
+client=genai.Client(api_key=os.getenv('API_KEY'))
 def gen_gemini_content(transcribe_text,prompt):
     reponse=client.models.generate_content(
         model="gemini-3.5-flash",
